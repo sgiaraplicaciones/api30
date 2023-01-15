@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EnvioMailService {
 	
-		public void sendEmail(Session session, String toEmail, String subject, String body){
+		public String sendEmail(Session session, String toEmail, String subject, String body){
 			try
 		    {
 		      MimeMessage msg = new MimeMessage(session);
@@ -23,7 +23,7 @@ public class EnvioMailService {
 		      msg.addHeader("format", "flowed");
 		      msg.addHeader("Content-Transfer-Encoding", "8bit");
 
-		      msg.setFrom(new InternetAddress("info@colonia-suiza.com", "Notificaciones"));
+		      msg.setFrom(new InternetAddress("no_responder@sgiar.org.ar", "SGIAR"));
 
 		      //msg.setReplyTo(InternetAddress.parse("no_reply@example.com", false));
 
@@ -37,10 +37,11 @@ public class EnvioMailService {
 		      //System.out.println("Message is ready");
 	    	  Transport.send(msg);  
 
-		      //System.out.println("EMail Sent Successfully!!");
+		      return "EMail Sent Successfully!!";
 		    }
 		    catch (Exception e) {
 		      e.printStackTrace();
+		      return "ERROR Sending mail!!";
 		    }
 		
     }
