@@ -23,6 +23,7 @@ public class TicketModel {
 	private String dni;
 	private String mail;
 	private String celular;
+	private int verificado; //1=acreditado
 	
 //	@Column(name="CODIGO_QR")
 //	private String codigoQR;
@@ -34,7 +35,7 @@ public class TicketModel {
 //	@Column(name="UID_FIREBASE")
 //	private Long uidFirebase;
 	
-	
+
 	public EventoModel getEvento() {
 		return evento;
 	}
@@ -78,12 +79,10 @@ public class TicketModel {
 	public void setCelular(String celular) {
 		this.celular = celular;
 	}
-
 	public int getVerificado() {
 		return verificado;
 	}
 	public void setVerificado(int verificado) {
 		this.verificado = verificado;
 	}
-	private int verificado;
 }

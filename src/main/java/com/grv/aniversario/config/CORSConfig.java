@@ -14,8 +14,8 @@ public class CORSConfig {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-						.allowedOrigins("*")
-						.allowedMethods("GET", "POST", "PUT", "DELETE");
+						.allowedOrigins("https://sgiar.org.ar")
+						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
 			}
 		};
 	}
