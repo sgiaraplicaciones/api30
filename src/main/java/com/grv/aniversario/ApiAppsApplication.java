@@ -6,6 +6,7 @@ import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
@@ -16,13 +17,18 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.grv.aniversario.property.FileStorageProperties;
 import com.grv.aniversario.security.JWTAuthorizationFilter;
 
 
 @SpringBootApplication
+@EnableConfigurationProperties({
+    FileStorageProperties.class
+})
 public class ApiAppsApplication {
 
 	public static void main(String[] args) {
+		
 		SpringApplication.run(ApiAppsApplication.class, args);
 	}
 	
@@ -79,15 +85,18 @@ public class ApiAppsApplication {
 		        .addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
 		        .csrf().disable()
 	            .authorizeHttpRequests((authz) -> authz
-	            		.antMatchers(HttpMethod.POST,"/auth/**").permitAll()
-	            		.antMatchers(HttpMethod.POST, "/**").permitAll()
-	            		.antMatchers(HttpMethod.GET, "/**").permitAll()
+	            		.antMatchers(HttpMethod.POST,"/auth/login").permitAll()
+//	            		.antMatchers(HttpMethod.POST, "/ticket/save").permitAll()
+//	            		.antMatchers(HttpMethod.POST, "/ticket/event/save").permitAll()
+//	            		.antMatchers(HttpMethod.POST, "/ticket/update/**").permitAll()
+	            		.antMatchers(HttpMethod.GET, "/testConnection").permitAll()
+//	            		.antMatchers(HttpMethod.GET, "/ticket/getAll/**").permitAll()
+//	            		.antMatchers(HttpMethod.GET, "/miembros/**").permitAll()
 	            		.antMatchers(HttpMethod.GET, SWAGGER_WHITELIST).permitAll()
 	            		
 	            		
 	                .anyRequest().authenticated()
 	            );
-	            /*.httpBasic(withDefaults());*/
 	        return http.build();
 	    }
 		

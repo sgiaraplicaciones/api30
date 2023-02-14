@@ -1,23 +1,23 @@
 package com.grv.aniversario.controllers;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Properties;
 
-import javax.mail.Authenticator;
-import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.grv.aniversario.DTO.MailDTO;
 import com.grv.aniversario.DTO.QRCodeDTO;
+import com.grv.aniversario.DTO.ResponseRequestDTO;
 import com.grv.aniversario.models.EventoModel;
 import com.grv.aniversario.models.TicketModel;
 import com.grv.aniversario.services.EnvioMailService;
@@ -36,6 +36,7 @@ public class ticketController {
 	
 	@Autowired
 	EnvioMailService mail;
+	
 
     @GetMapping(path="/{idTicket}")
     public Optional <TicketModel> getTicketById(@PathVariable("idTicket") Long idTicket){
@@ -45,6 +46,16 @@ public class ticketController {
     @GetMapping(path="/getAll")
     public Iterable<TicketModel> getAllTickets(){
     	return ticketService.getAll();
+    }
+    
+    @GetMapping(path="/acreditados/getAll")
+    public Iterable<TicketModel> getAllTicketsPresent(){
+    	return ticketService.getAllAcreditados(1);
+    }
+    
+    @GetMapping(path="/acreditados/getAllByEvento/{idEvento}")
+    public Iterable<TicketModel> getAllAcreditadosByEvento(@PathVariable("idEvento") Long idEvento){
+    	return ticketService.getAllAcreditadosByEvento(idEvento);
     }
     
     @GetMapping(path="/getAll/evento/{idEvento}")
@@ -62,6 +73,67 @@ public class ticketController {
     
     @PostMapping(path="/save")
     public TicketModel saveTicket(@RequestBody TicketModel ticket){
+    	try {
+    		ResponseRequestDTO response = getPersona(ticket.getDni());
+    		if(response != null && response.getStatus().equalsIgnoreCase("ok")) {
+    			String nombre = response.getData().getPersona().getNombre();
+    			String apellido = response.getData().getPersona().getApellido();
+    			String region = response.getData().getMiembro().getHan().getNombres().get(2);
+    			String partidoComunidad = response.getData().getMiembro().getHan().getNombres().get(3);
+    			String localidadBarrio = response.getData().getMiembro().getHan().getNombres().get(4);
+    			String han = response.getData().getMiembro().getHan().getNombres().get(response.getData().getMiembro().getHan().getNombres().size() - 1);
+    			
+    			ticket.setEsMiembro(1);
+    			ticket.setNombre(nombre);
+    			ticket.setApellido(apellido);
+    			ticket.setRegion(region);
+    			ticket.setPartidoComunidad(partidoComunidad);
+    			ticket.setLocalidadBarrio(localidadBarrio);
+    			ticket.setHan(han);
+    			
+    		}else {
+    			ticket.setEsMiembro(0);
+    		}
+    	}catch (Exception ex) {
+    		System.out.println("Error en servicio saveTiket. Error: " + ex.getMessage());
+    	}
+    	
+    	ticket.setFechaGenerado(LocalDateTime.now());
+    	return ticketService.saveTicket(ticket);
+    }
+    
+    @PostMapping(path="/update/datos/")
+    public TicketModel updateDatosTicket(@RequestBody TicketModel t){
+    	Optional<TicketModel> opt = ticketService.getTicketByDniAndEvento(t.getDni(), t.getEvento().getId());
+    	TicketModel ticket = new TicketModel();
+    	if(opt.isPresent()) {
+    		ticket = opt.get();
+    		
+    		ResponseRequestDTO response = getPersona(t.getDni());
+			if(response != null && response.getStatus().equalsIgnoreCase("ok")) {
+				String nombre = response.getData().getPersona().getNombre();
+				String apellido = response.getData().getPersona().getApellido();
+				String region = response.getData().getMiembro().getHan().getNombres().get(2);
+				String partidoComunidad = response.getData().getMiembro().getHan().getNombres().get(3);
+				String localidadBarrio = response.getData().getMiembro().getHan().getNombres().get(4);
+				String han = response.getData().getMiembro().getHan().getNombres().get(response.getData().getMiembro().getHan().getNombres().size() - 1);
+				
+				ticket.setEsMiembro(1);
+				ticket.setNombre(nombre);
+				ticket.setApellido(apellido);
+				ticket.setRegion(region);
+				ticket.setPartidoComunidad(partidoComunidad);
+				ticket.setLocalidadBarrio(localidadBarrio);
+				ticket.setHan(han);
+				
+			}else {
+				ticket.setEsMiembro(0);
+			}
+    	}else {
+    		return ticket;
+    	}
+    	
+    	
     	return ticketService.saveTicket(ticket);
     }
     
@@ -80,16 +152,13 @@ public class ticketController {
     	
     }
     
-    @PutMapping(path="/update")
-    public TicketModel updateTicket(@RequestBody TicketModel ticket){
-    	return ticketService.saveTicket(ticket);
-    }
+//    @PutMapping(path="/update")
+//    public TicketModel updateTicket(@RequestBody TicketModel ticket){
+//    	return ticketService.saveTicket(ticket);
+//    }
     
     @PostMapping(path="/mail")
     public String sendEmail(@RequestBody MailDTO data){
-    	
-    	String userName = "no_responder@sgiar.org.ar";
-    	String pass = "Resp19";
     	
     	Properties props = new Properties();
 		   props.put("mail.smtp.auth", "false");
@@ -102,7 +171,7 @@ public class ticketController {
     }
     
     @PostMapping(path="/event/acreditate")
-    public boolean setAcreditation(@RequestBody QRCodeDTO qr){
+    public TicketModel setAcreditation(@RequestBody QRCodeDTO qr){
     	Optional<TicketModel> ticketOpt = null;
     	if(qr.getDni() != null) {
     		ticketOpt = ticketService.getTicketByDniAndEvento(qr.getDni(), qr.getIdEvento());
@@ -111,11 +180,21 @@ public class ticketController {
     	}
     	if(ticketOpt.isPresent()) {
 			TicketModel ticket = ticketOpt.get();
+			if(ticket.getVerificado() == 1) {
+				return null;
+			}
 			ticket.setVerificado(1);
+			ticket.setFechaAcreditado(LocalDateTime.now());
 			ticketService.saveTicket(ticket);
-			return true;    			
+			return ticket;    			
 		}
-    	return false;
+    	return ticketOpt.get();
+    }
+    
+    private ResponseRequestDTO getPersona(String dni) {
+    	String url = "https://www.sgiar.org.ar/api/v1/acredita/persona?token=tokenPrivadoSecret&d=" + dni;
+		RestTemplate restTemplate = new RestTemplate();
+    	return restTemplate.getForObject(url, ResponseRequestDTO.class);
     }
 
 }

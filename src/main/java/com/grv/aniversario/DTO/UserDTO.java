@@ -1,6 +1,6 @@
-package com.grv.aniversario.models;
+package com.grv.aniversario.DTO;
 
-public class UserAuthModel {
+public class UserDTO {
 	
 	private String user;
 	private String pass;

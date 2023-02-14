@@ -4,14 +4,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
-import com.grv.aniversario.models.UserAuthModel;
+import com.google.gson.JsonObject;
+import com.grv.aniversario.DTO.FirebaseResponseDTO;
+import com.grv.aniversario.DTO.UserDTO;
+import com.grv.aniversario.services.UserService;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -19,24 +27,21 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @RestController
 public class AuthController {
 	
-	@PostMapping("auth/loginWhitPassword")
-	public UserAuthModel login(@RequestParam("key") String key, @RequestBody UserAuthModel user) {
-		String username = user.getUser();
-		String pass = user.getPass();
-		String keyHarcode = "-ColoniaSuiza_salud_2022-GRV_APIKeyForApps";
-		String userHarcode = "AppsGRV";
-		String passHarcode = ".ColoniaSuiza.2022.";
-		if(keyHarcode.equalsIgnoreCase(key)) {
-			if(username.equalsIgnoreCase(userHarcode) && pass.contentEquals(passHarcode)) {
-				String token = getJWTToken(username);
-				user.setUser(username);
-				user.setToken(token);
-				user.setPass("hidden");
-				return user;
-			}
+	@Autowired
+	UserService userService;
+	private HttpHeaders headers;
+	
+	
+	@PostMapping("auth/login")
+	public UserDTO login(@RequestBody UserDTO userDTO) {
+		
+		boolean loginFirebase = loginInFirebase(userDTO.getUser(), userDTO.getPass());
+		if(loginFirebase) {
+			String token = getJWTToken(userDTO.getUser());
+			userDTO.setToken(token);
+			userDTO.setPass(null);
 		}
-
-		return null;
+		return userDTO;
 	}
 
 	private String getJWTToken(String username) {
@@ -53,10 +58,34 @@ public class AuthController {
 								.map(GrantedAuthority::getAuthority)
 								.collect(Collectors.toList()))
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + 600000))
+				.setExpiration(new Date(System.currentTimeMillis() + 18000000 * 4))
 				.signWith(SignatureAlgorithm.HS512,
 						secretKey.getBytes()).compact();
 
 		return "Bearer " + token;
 	}
+	
+	private boolean loginInFirebase(String email, String password) {
+    	String url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDzuyH9BHl93tGo0K0M-O4X58-BXBI5Jw4";		
+    	RestTemplate restTemplate = new RestTemplate();
+    	JsonObject json = new JsonObject();
+    	json.addProperty("email", email);
+    	json.addProperty("password", password);
+    	json.addProperty("returnSecureToken", true);
+    	headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+    	HttpEntity<String> request = new HttpEntity<String>(json.toString(), headers);
+    	FirebaseResponseDTO response = null;
+    	try {
+    		response = restTemplate.postForObject(url, request,  FirebaseResponseDTO.class);
+    	}catch (HttpClientErrorException err) {
+    		System.out.println(err.getMessage());
+    		return false;
+    	}
+    	
+    	if(!response.getIdToken().isBlank()) {
+    		return true;
+    	}
+    	return false;
+    }
 }

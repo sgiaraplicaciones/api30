@@ -1,5 +1,7 @@
 package com.grv.aniversario.models;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,6 +26,15 @@ public class TicketModel {
 	private String mail;
 	private String celular;
 	private int verificado; //1=acreditado
+	@Column(name="FECHA_GENERADO")
+	private LocalDateTime fechaGenerado;
+	@Column(name="FECHA_ACREDITADO")
+	private LocalDateTime fechaAcreditado;
+	private int esMiembro;
+	private String region;
+	private String partidoComunidad;
+	private String localidadBarrio;
+	private String han;
 	
 //	@Column(name="CODIGO_QR")
 //	private String codigoQR;
@@ -85,4 +96,49 @@ public class TicketModel {
 	public void setVerificado(int verificado) {
 		this.verificado = verificado;
 	}
+	public LocalDateTime getFechaGenerado() {
+		return fechaGenerado;
+	}
+	public void setFechaGenerado(LocalDateTime fechaGenerado) {
+		this.fechaGenerado = fechaGenerado;
+	}
+	public LocalDateTime getFechaAcreditado() {
+		return fechaAcreditado;
+	}
+	public void setFechaAcreditado(LocalDateTime fechaAcreditado) {
+		this.fechaAcreditado = fechaAcreditado;
+	}
+	public int getEsMiembro() {
+		return esMiembro;
+	}
+	public void setEsMiembro(int esMiembro) {
+		this.esMiembro = esMiembro;
+	}
+	public String getRegion() {
+		return region;
+	}
+	public void setRegion(String region) {
+		this.region = region;
+	}
+	public String getPartidoComunidad() {
+		return partidoComunidad;
+	}
+	public void setPartidoComunidad(String partidoComunidad) {
+		this.partidoComunidad = partidoComunidad;
+	}
+	public String getLocalidadBarrio() {
+		return localidadBarrio;
+	}
+	public void setLocalidadBarrio(String localidadBarrio) {
+		this.localidadBarrio = localidadBarrio;
+	}
+	public String getHan() {
+		return han;
+	}
+	public void setHan(String han) {
+		this.han = han;
+	}
+	
+	
+	
 }

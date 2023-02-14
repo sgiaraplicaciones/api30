@@ -1,7 +1,6 @@
 
 package com.grv.aniversario.services;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,16 @@ public class TicketService {
 		return ticketRepository.findAll();
 	}
 	
+	public Iterable<TicketModel> getAllAcreditados(int verificado){
+		return ticketRepository.findAllByVerificado(verificado);
+	}
+	
 	public Iterable<TicketModel> getAllByEvento(EventoModel evento){
 		return ticketRepository.findAllByEvento(evento);
+	}
+	
+	public Iterable<TicketModel> getAllAcreditadosByEvento(Long idEvento){
+		return ticketRepository.findAllVerificadosByEvento(idEvento);
 	}
 	
 	public Optional<TicketModel> findById(Long idTicket){
