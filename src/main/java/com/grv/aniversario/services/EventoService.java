@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.grv.aniversario.models.EstadoEventoModel;
 import com.grv.aniversario.models.EventoModel;
+import com.grv.aniversario.repositories.EstadoEventoRepository;
 import com.grv.aniversario.repositories.EventoRepository;
 
 @Service
@@ -14,6 +15,9 @@ public class EventoService {
 	
 	@Autowired
 	EventoRepository eventoRepository;
+	
+	@Autowired
+	EstadoEventoService estadoEventoService;
 
 	public Optional<EventoModel> getEventoById(Long idEvento) {
 		return eventoRepository.findById(idEvento);
@@ -26,6 +30,8 @@ public class EventoService {
 	}
 	
 	public EventoModel save(EventoModel evento) {
+		EstadoEventoModel estado = estadoEventoService.getEstadoEventoById(1L).get();
+		evento.setEstado(estado);
 		return eventoRepository.save(evento);
 	}
 }

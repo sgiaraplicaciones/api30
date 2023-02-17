@@ -1,12 +1,16 @@
 package com.grv.aniversario.controllers;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
 import javax.mail.Session;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,9 +42,25 @@ public class ticketController {
 	EnvioMailService mail;
 	
 
+//    @GetMapping(path="/{idTicket}")
+//    public Optional <TicketModel> getTicketById(@PathVariable("idTicket") Long idTicket){
+//    	return ticketService.findById(idTicket);
+//    }
+//    
     @GetMapping(path="/{idTicket}")
-    public Optional <TicketModel> getTicketById(@PathVariable("idTicket") Long idTicket){
-    	return ticketService.findById(idTicket);
+    public ResponseEntity<?> getTicketById(@PathVariable("idTicket") Long idTicket){
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
+    	Optional<TicketModel> ticketOpt = ticketService.findById(idTicket);
+    	if(ticketOpt.isPresent()) {
+    		map.put("status", 200);
+    		map.put("data", ticketOpt.get());
+    		return new ResponseEntity<>(map, HttpStatus.OK);
+    	}else {
+    		map.clear();
+    		map.put("message", "Ticket no encontrado");
+    		return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
+    	}
+    	
     }
     
     @GetMapping(path="/getAll")
@@ -137,17 +157,44 @@ public class ticketController {
     	return ticketService.saveTicket(ticket);
     }
     
+//    @PostMapping(path="/event/save")
+//    public boolean saveEvent(@RequestBody TicketModel ticket){
+//    	TicketModel ticketExist = ticketService.getTicketById(ticket.getId()).get();
+//    	EventoModel event = ticket.getEvento();
+//    	boolean exist = ticketService.checkTicketExist(ticketExist.getDni(), event.getId());
+//    	if(!exist) {
+//    		ticketExist.setEvento(event);
+//    		ticketService.saveTicket(ticketExist);
+//    		return true;
+//    	}else {
+//    		return false;
+//    	}
+//    }
+    
     @PostMapping(path="/event/save")
-    public boolean saveEvent(@RequestBody TicketModel ticket){
-    	TicketModel ticketExist = ticketService.getTicketById(ticket.getId()).get();
-    	EventoModel event = ticket.getEvento();
-    	boolean exist = ticketService.checkTicketExist(ticketExist.getDni(), event.getId());
-    	if(!exist) {
-    		ticketExist.setEvento(event);
-    		ticketService.saveTicket(ticketExist);
-    		return true;
+    public ResponseEntity<?> saveEvent(@RequestBody TicketModel ticket){
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
+    	Optional<TicketModel> optT = ticketService.getTicketById(ticket.getId());
+    	if(optT.isPresent()) {
+    		TicketModel ticketExist = optT.get();
+    		EventoModel event = ticket.getEvento();
+    		boolean exist = ticketService.checkTicketExist(ticketExist.getDni(), event.getId());
+    		if(!exist) {
+    			ticketExist.setEvento(event);
+        		ticketService.saveTicket(ticketExist);
+        		map.put("status", "ok");
+        		map.put("message", "Evento guardado correctamente");
+        		return new ResponseEntity<>(map, HttpStatus.OK);
+        		
+    		}else {
+    			map.put("status", "error");
+        		map.put("message", "Ya existe un ticket para la persona y evento seleccionados");
+        		return new ResponseEntity<>(map, HttpStatus.NOT_ACCEPTABLE);
+    		}
     	}else {
-    		return false;
+    		map.put("status", "error");
+    		map.put("message", "Ticket inexistente");
+    		return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
     	}
     	
     }
@@ -170,25 +217,54 @@ public class ticketController {
     	return mail.sendEmail(session, data.getTo(), data.getSubject(), data.getContent());
     }
     
+//    @PostMapping(path="/event/acreditate")
+//    public TicketModel setAcreditation(@RequestBody QRCodeDTO qr){
+//    	Optional<TicketModel> ticketOpt = null;
+//    	if(qr.getDni() != null) {
+//    		ticketOpt = ticketService.getTicketByDniAndEvento(qr.getDni(), qr.getIdEvento());
+//    	}else if(qr.getMail() != null) {
+//    		ticketOpt = ticketService.getTicketByMailAndEvento(qr.getMail(), qr.getIdEvento());	
+//    	}
+//    	if(ticketOpt.isPresent()) {
+//			TicketModel ticket = ticketOpt.get();
+//			if(ticket.getVerificado() == 1) {
+//				return null;
+//			}
+//			ticket.setVerificado(1);
+//			ticket.setFechaAcreditado(LocalDateTime.now());
+//			ticketService.saveTicket(ticket);
+//			return ticket;    			
+//		}
+//    	return ticketOpt.get();
+//    }
+    
     @PostMapping(path="/event/acreditate")
-    public TicketModel setAcreditation(@RequestBody QRCodeDTO qr){
-    	Optional<TicketModel> ticketOpt = null;
+    public ResponseEntity<?> acreditate(@RequestBody QRCodeDTO qr){
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
     	if(qr.getDni() != null) {
-    		ticketOpt = ticketService.getTicketByDniAndEvento(qr.getDni(), qr.getIdEvento());
-    	}else if(qr.getMail() != null) {
-    		ticketOpt = ticketService.getTicketByMailAndEvento(qr.getMail(), qr.getIdEvento());	
+    		Optional<TicketModel> ticketOpt = ticketService.getTicketByDniAndEvento(qr.getDni(), qr.getIdEvento());
+    		if(ticketOpt.isPresent()) {
+    			TicketModel ticket = ticketOpt.get();
+    			if(ticket.getVerificado() == 1) {
+    				map.put("status", "error");
+    				map.put("message", "La persona con dni " + qr.getDni() + " ya ha sido acreditada.");
+    				return new ResponseEntity<>(map, HttpStatus.NOT_ACCEPTABLE);
+    			}
+    			ticket.setVerificado(1);
+    			ticket.setFechaAcreditado(LocalDateTime.now());
+    			ticketService.saveTicket(ticket);
+    			map.put("status", "ok");
+				map.put("message", "La persona con dni " + qr.getDni() + " ha sido acreditada correctamente.");
+				map.put("data", ticket);
+				return new ResponseEntity<>(map, HttpStatus.OK);
+    		}
+    		map.put("status", "error");
+			map.put("message", "No existe entrada para este evento con el dni: " + qr.getDni());
+			return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
     	}
-    	if(ticketOpt.isPresent()) {
-			TicketModel ticket = ticketOpt.get();
-			if(ticket.getVerificado() == 1) {
-				return null;
-			}
-			ticket.setVerificado(1);
-			ticket.setFechaAcreditado(LocalDateTime.now());
-			ticketService.saveTicket(ticket);
-			return ticket;    			
-		}
-    	return ticketOpt.get();
+    	map.put("status", "error");
+		map.put("message", "Se requiere DNI");
+		return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
     }
     
     private ResponseRequestDTO getPersona(String dni) {
