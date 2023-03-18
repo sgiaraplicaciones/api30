@@ -1,15 +1,22 @@
 package com.grv.aniversario.controllers;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,17 +38,30 @@ public class AuthController {
 	UserService userService;
 	private HttpHeaders headers;
 	
+   
+	
 	
 	@PostMapping("auth/login")
-	public UserDTO login(@RequestBody UserDTO userDTO) {
-		
-		boolean loginFirebase = loginInFirebase(userDTO.getUser(), userDTO.getPass());
+	public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
+		//boolean loginFirebase = loginInFirebase(userDTO.getUser(), userDTO.getPass());
+    	//COMENTO EL LOGIN CON FIREBASE Y HARCODEO PARA USAR SIN INTERNET EN CCJ
+    	boolean loginFirebase = false;
+    	if(userDTO.getUser().equalsIgnoreCase("acreditacion@gmail.com") && userDTO.getPass().equalsIgnoreCase("1234")) {
+    		loginFirebase = true;
+    	}
 		if(loginFirebase) {
 			String token = getJWTToken(userDTO.getUser());
 			userDTO.setToken(token);
 			userDTO.setPass(null);
+			map.put("status", "ok");
+			map.put("data", userDTO);
+			return new ResponseEntity<>(map, HttpStatus.OK);
 		}
-		return userDTO;
+			map.put("status", "error");
+			map.put("data", userDTO);
+			map.put("message", "Usuario o Contraseña incorrectas");
+			return new ResponseEntity<>(map, HttpStatus.UNAUTHORIZED);
 	}
 
 	private String getJWTToken(String username) {

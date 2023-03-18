@@ -53,7 +53,7 @@ public class ApiAppsApplication {
             }
         };
 
-        // Add HTTP to HTTPS redirect
+//         Add HTTP to HTTPS redirect
         tomcat.addAdditionalTomcatConnectors(httpToHttpsRedirectConnector());
 
         return tomcat;
@@ -86,12 +86,11 @@ public class ApiAppsApplication {
 		        .csrf().disable()
 	            .authorizeHttpRequests((authz) -> authz
 	            		.antMatchers(HttpMethod.POST,"/auth/login").permitAll()
-//	            		.antMatchers(HttpMethod.POST, "/ticket/save").permitAll()
-//	            		.antMatchers(HttpMethod.POST, "/ticket/event/save").permitAll()
-//	            		.antMatchers(HttpMethod.POST, "/ticket/update/**").permitAll()
+	            		.antMatchers(HttpMethod.POST, "/ticket/**").permitAll()
+	            		.antMatchers(HttpMethod.POST, "/ticket/event/save").permitAll()
+	            		.antMatchers(HttpMethod.POST, "/ticket/update/**").permitAll()
+	            		.antMatchers(HttpMethod.GET, "/ticket/getAll/**").permitAll()
 	            		.antMatchers(HttpMethod.GET, "/testConnection").permitAll()
-//	            		.antMatchers(HttpMethod.GET, "/ticket/getAll/**").permitAll()
-//	            		.antMatchers(HttpMethod.GET, "/miembros/**").permitAll()
 	            		.antMatchers(HttpMethod.GET, SWAGGER_WHITELIST).permitAll()
 	            		
 	            		

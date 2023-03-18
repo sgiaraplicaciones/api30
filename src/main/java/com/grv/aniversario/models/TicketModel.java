@@ -35,10 +35,19 @@ public class TicketModel {
 	private String partidoComunidad;
 	private String localidadBarrio;
 	private String han;
+	@Column(name="FECHA_NACIMIENTO")
+	private String fechaNacimiento;
+	
 	
 //	@Column(name="CODIGO_QR")
 //	private String codigoQR;
 	
+	public String getFechaNacimiento() {
+		return fechaNacimiento;
+	}
+	public void setFechaNacimiento(String fechaNacimiento) {
+		this.fechaNacimiento = fechaNacimiento;
+	}
 	@ManyToOne
 	@JoinColumn(name = "ID_EVENTO", referencedColumnName = "ID")
 	private EventoModel evento;

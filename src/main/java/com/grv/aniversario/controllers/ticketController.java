@@ -93,6 +93,17 @@ public class ticketController {
     
     @PostMapping(path="/save")
     public TicketModel saveTicket(@RequestBody TicketModel ticket){
+
+    	Optional<TicketModel> opt = ticketService.getTicketByDniAndEvento(ticket.getDni(), ticket.getEvento().getId());
+    	if(opt.isPresent()) {
+    		return null;
+    	}
+    	ticket.setFechaGenerado(LocalDateTime.now());
+    	return ticketService.saveTicket(ticket);
+    }
+    
+    @PostMapping(path="/saveWithData")
+    public TicketModel saveTicketWithData(@RequestBody TicketModel ticket){
     	try {
     		ResponseRequestDTO response = getPersona(ticket.getDni());
     		if(response != null && response.getStatus().equalsIgnoreCase("ok")) {
@@ -117,9 +128,54 @@ public class ticketController {
     	}catch (Exception ex) {
     		System.out.println("Error en servicio saveTiket. Error: " + ex.getMessage());
     	}
-    	
+    	Optional<TicketModel> opt = ticketService.getTicketByDniAndEvento(ticket.getDni(), ticket.getEvento().getId());
+    	if(opt.isPresent()) {
+    		return null;
+    	}
     	ticket.setFechaGenerado(LocalDateTime.now());
     	return ticketService.saveTicket(ticket);
+    }
+    
+    @PostMapping(path="/saveDataOrganizativa")
+    public TicketModel saveDataOrganizativa(@RequestBody TicketModel ticket){
+    	Optional<TicketModel> opt = ticketService.getTicketByDniAndEvento(ticket.getDni(), ticket.getEvento().getId());
+    	if(opt.isPresent()) {
+    		try {
+    			ResponseRequestDTO response = getPersona(ticket.getDni());
+	    		if(response != null && response.getStatus().equalsIgnoreCase("ok")) {
+	    			String region = response.getData().getMiembro().getHan().getNombres().get(2);
+	    			//String partidoComunidad = response.getData().getMiembro().getHan().getNombres().get(3);
+	    			//String localidadBarrio = response.getData().getMiembro().getHan().getNombres().get(4);
+	    			String han = response.getData().getMiembro().getHan().getNombres().get(response.getData().getMiembro().getHan().getNombres().size() - 1);
+	    			String nombre = response.getData().getPersona().getNombre();
+	    			String apellido = response.getData().getPersona().getApellido();
+	    			TicketModel presentTicket = opt.get();
+	    			
+	    			presentTicket.setRegion(region);
+	    			//presentTicket.setPartidoComunidad(partidoComunidad);
+	    			//presentTicket.setLocalidadBarrio(localidadBarrio);
+	    			presentTicket.setHan(han);
+	    			presentTicket.setEsMiembro(1);
+	    			presentTicket.setNombre(nombre + " " + apellido);
+	    			
+	    			return ticketService.saveTicket(presentTicket);
+	    		}else {
+	    			TicketModel presentTicket = opt.get();
+	    			presentTicket.setNombre(ticket.getNombre());
+	    			presentTicket.setEsMiembro(0);
+	    			return ticketService.saveTicket(presentTicket);
+	    		}
+	    	}catch (Exception ex) {
+	    		System.out.println("Error en servicio saveTiket. Error: " + ex.getMessage());
+	    		TicketModel presentTicket = opt.get();
+    			presentTicket.setNombre(ticket.getNombre());
+    			presentTicket.setEsMiembro(0);
+    			return ticketService.saveTicket(presentTicket);
+	    	}
+    		
+    	}
+    	ticket.setNombre("No es miembro o no figura en extranet");
+    	return ticket;
     }
     
     @PostMapping(path="/update/datos/")
@@ -248,6 +304,7 @@ public class ticketController {
     			if(ticket.getVerificado() == 1) {
     				map.put("status", "error");
     				map.put("message", "La persona con dni " + qr.getDni() + " ya ha sido acreditada.");
+    				map.put("code", "01");
     				return new ResponseEntity<>(map, HttpStatus.NOT_ACCEPTABLE);
     			}
     			ticket.setVerificado(1);
