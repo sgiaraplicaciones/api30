@@ -10,13 +10,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="organizacion")
-public class OrganizacionModel {
-
+@Table(name="barrio")
+public class BarrioModel {
+	
 	@Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)    
-    @Column(name="ID_ORGANIZACION", nullable = false)
-	private Long idOrganizacion;
+    @Column(nullable = false)
+	private Long idBarrio;
 	
 	@ManyToOne
 	@JoinColumn(name = "idCoordinadora", referencedColumnName = "idCoordinadora")
@@ -25,88 +25,57 @@ public class OrganizacionModel {
 	@ManyToOne
 	@JoinColumn(name = "idRegion", referencedColumnName = "idRegion")
 	private RegionModel region;
-
-	private String subRegion;
 	
 	@ManyToOne
 	@JoinColumn(name = "idComunidad", referencedColumnName = "idComunidad")
 	private ComunidadModel comunidad;
 	
-	@ManyToOne
-	@JoinColumn(name = "idBarrio", referencedColumnName = "idBarrio")
-	private BarrioModel barrio;
-	
-	private String sector;
-	
-	@ManyToOne
-	@JoinColumn(name = "idHan", referencedColumnName = "idHan")
-	private HanModel idHan;
-
-	public Long getIdOrganizacion() {
-		return idOrganizacion;
+	private String descripcion;
+	private Integer activo;
+	private Integer cantidad;
+	public Long getIdBarrio() {
+		return idBarrio;
 	}
-
-	public void setIdOrganizacion(Long idOrganizacion) {
-		this.idOrganizacion = idOrganizacion;
+	public void setIdBarrio(Long idBarrio) {
+		this.idBarrio = idBarrio;
 	}
-
 	public CoordinadoraModel getCoordinadora() {
 		return coordinadora;
 	}
-
 	public void setCoordinadora(CoordinadoraModel coordinadora) {
 		this.coordinadora = coordinadora;
 	}
-
 	public RegionModel getRegion() {
 		return region;
 	}
-
 	public void setRegion(RegionModel region) {
 		this.region = region;
-	}
-
-	public String getSubRegion() {
-		return subRegion;
-	}
-
-	public void setSubRegion(String subRegion) {
-		this.subRegion = subRegion;
 	}
 
 	public ComunidadModel getComunidad() {
 		return comunidad;
 	}
-
 	public void setComunidad(ComunidadModel comunidad) {
 		this.comunidad = comunidad;
 	}
-
-	public BarrioModel getBarrio() {
-		return barrio;
+	public String getDescripcion() {
+		return descripcion;
 	}
-
-	public void setBarrio(BarrioModel barrio) {
-		this.barrio = barrio;
+	public void setDescripcion(String descripcion) {
+		this.descripcion = descripcion;
 	}
-
-	public String getSector() {
-		return sector;
+	public Integer getActivo() {
+		return activo;
 	}
-
-	public void setSector(String sector) {
-		this.sector = sector;
+	public void setActivo(Integer activo) {
+		this.activo = activo;
 	}
-
-	public HanModel getIdHan() {
-		return idHan;
+	public Integer getCantidad() {
+		return cantidad;
 	}
-
-	public void setIdHan(HanModel idHan) {
-		this.idHan = idHan;
+	public void setCantidad(Integer cantidad) {
+		this.cantidad = cantidad;
 	}
-
-
 	
 	
 }

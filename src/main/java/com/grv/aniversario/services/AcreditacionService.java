@@ -1,6 +1,7 @@
 package com.grv.aniversario.services;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,5 +21,17 @@ public class AcreditacionService {
 		acreditacion.setFechaHoraIngreso(LocalDateTime.now());
 		acreditacionRepository.save(acreditacion);
 		return true;
+	}
+	
+	public AcreditacionModel save(AcreditacionModel acreditacion) {
+		return acreditacionRepository.save(acreditacion);
+	}
+	
+	public Optional<AcreditacionModel> getById(Long idAcreditacion) {
+		return acreditacionRepository.findById(idAcreditacion);
+	}
+	
+	public Optional<AcreditacionModel> getByMiembro(MiembroModel miembro){
+		return acreditacionRepository.findByMiembro(miembro);
 	}
 }

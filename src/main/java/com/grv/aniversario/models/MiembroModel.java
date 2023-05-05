@@ -17,6 +17,10 @@ public class MiembroModel {
 	private String apellido;
 	private String dni;
 	private String mail;
+	
+	@ManyToOne
+	@JoinColumn(name = "ID_GRUPO", referencedColumnName = "ID_GRUPO")
+	private GrupoModel grupo;
 
 	@ManyToOne
 	@JoinColumn(name = "ID_ORGANIZACION", referencedColumnName = "ID_ORGANIZACION")
@@ -101,6 +105,14 @@ public class MiembroModel {
 
 	public void setFechaModificacion(LocalDateTime fechaModificacion) {
 		this.fechaModificacion = LocalDateTime.now();
+	}
+
+	public GrupoModel getGrupo() {
+		return grupo;
+	}
+
+	public void setGrupo(GrupoModel grupo) {
+		this.grupo = grupo;
 	}
 	
 	

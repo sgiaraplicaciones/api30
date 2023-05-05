@@ -1,5 +1,7 @@
 package com.grv.aniversario.models;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,13 +12,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="organizacion")
-public class OrganizacionModel {
+@Table(name="hanesxregion")
+public class HanModel {
 
 	@Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)    
-    @Column(name="ID_ORGANIZACION", nullable = false)
-	private Long idOrganizacion;
+    @Column(nullable = false)
+	private Long idHan;
+	private String han;
+	private Integer obsolet;
 	
 	@ManyToOne
 	@JoinColumn(name = "idCoordinadora", referencedColumnName = "idCoordinadora")
@@ -38,16 +42,30 @@ public class OrganizacionModel {
 	
 	private String sector;
 	
-	@ManyToOne
-	@JoinColumn(name = "idHan", referencedColumnName = "idHan")
-	private HanModel idHan;
+	private LocalDateTime fecha;
 
-	public Long getIdOrganizacion() {
-		return idOrganizacion;
+	public Long getIdHan() {
+		return idHan;
 	}
 
-	public void setIdOrganizacion(Long idOrganizacion) {
-		this.idOrganizacion = idOrganizacion;
+	public void setIdHan(Long idHan) {
+		this.idHan = idHan;
+	}
+
+	public String getHan() {
+		return han;
+	}
+
+	public void setHan(String han) {
+		this.han = han;
+	}
+
+	public Integer getObsolet() {
+		return obsolet;
+	}
+
+	public void setObsolet(Integer obsolet) {
+		this.obsolet = obsolet;
 	}
 
 	public CoordinadoraModel getCoordinadora() {
@@ -74,6 +92,8 @@ public class OrganizacionModel {
 		this.subRegion = subRegion;
 	}
 
+
+
 	public ComunidadModel getComunidad() {
 		return comunidad;
 	}
@@ -98,15 +118,14 @@ public class OrganizacionModel {
 		this.sector = sector;
 	}
 
-	public HanModel getIdHan() {
-		return idHan;
+	public LocalDateTime getFecha() {
+		return fecha;
 	}
 
-	public void setIdHan(HanModel idHan) {
-		this.idHan = idHan;
+	public void setFecha(LocalDateTime fecha) {
+		this.fecha = fecha;
 	}
-
-
+	
 	
 	
 }

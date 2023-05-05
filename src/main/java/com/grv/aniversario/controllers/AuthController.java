@@ -1,13 +1,17 @@
 package com.grv.aniversario.controllers;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,15 +37,21 @@ public class AuthController {
 	
 	
 	@PostMapping("auth/login")
-	public UserDTO login(@RequestBody UserDTO userDTO) {
-		
+	public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
 		boolean loginFirebase = loginInFirebase(userDTO.getUser(), userDTO.getPass());
 		if(loginFirebase) {
 			String token = getJWTToken(userDTO.getUser());
 			userDTO.setToken(token);
 			userDTO.setPass(null);
+			map.put("status", "ok");
+			map.put("data", userDTO);
+			return new ResponseEntity<>(map, HttpStatus.OK);
 		}
-		return userDTO;
+			map.put("status", "error");
+			map.put("data", userDTO);
+			map.put("message", "Usuario o Contraseña incorrectas");
+			return new ResponseEntity<>(map, HttpStatus.UNAUTHORIZED);
 	}
 
 	private String getJWTToken(String username) {

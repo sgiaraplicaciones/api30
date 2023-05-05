@@ -24,6 +24,10 @@ public class AcreditacionModel {
 	@JoinColumn(name = "ID_MIEMBRO", referencedColumnName = "ID_MIEMBRO")
 	private MiembroModel miembro;
 	
+	@ManyToOne
+	@JoinColumn(name = "ID_EVENTO", referencedColumnName = "ID")
+	private EventoModel evento;
+	
 	@Column(name="FECHA_HORA_INGRESO", nullable = false)
 	private LocalDateTime fechaHoraIngreso;
 
@@ -49,6 +53,14 @@ public class AcreditacionModel {
 
 	public void setFechaHoraIngreso(LocalDateTime fechaHoraIngreso) {
 		this.fechaHoraIngreso = fechaHoraIngreso;
+	}
+
+	public EventoModel getEvento() {
+		return evento;
+	}
+
+	public void setEvento(EventoModel evento) {
+		this.evento = evento;
 	}
 	
 	

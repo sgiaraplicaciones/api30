@@ -11,4 +11,6 @@ import com.grv.aniversario.models.UsuarioModel;
 public interface UserRepository extends CrudRepository<UsuarioModel, Long> {
 
 	public abstract Optional<UsuarioModel> findByName(String name);
-	public abstract Optional<UsuarioModel> findByMail(String mail);}
+	public abstract Optional<UsuarioModel> findByMail(String mail);
+
+}
